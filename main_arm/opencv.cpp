@@ -67,10 +67,10 @@ manuall:
 }
 bool opencv::red() {
 	color = 0;
-	iLowHHigh = 170;
-	iHighHHigh = 179;
-	iLowHLow = 0;
-	iHighHLow = 2;
+	iLowHHigh = 0;
+	iHighHHigh = 2;
+	iLowHLow = 165;
+	iHighHLow = 180;
 	iLowS = 100;
 	iHighS = 255;
 	iLowV = 90;
@@ -82,7 +82,7 @@ bool opencv::yellow() {
 	color = 1;
 	iLowHLow = 15;
 	iHighHLow = 40;
-	iLowS = 100;
+	iLowS = 130;
 	iHighS = 255;
 	iLowV = 25;
 	iHighV = 255;
@@ -91,7 +91,7 @@ bool opencv::yellow() {
 bool opencv::orange() {
 	color = 4;
 	iLowHLow = 5;
-	iHighHLow = 15;
+	iHighHLow = 10;
 	iLowS = 100;
 	iHighS = 255;
 	iLowV = 100;
@@ -102,7 +102,7 @@ bool opencv::green() {
 	color = 2;
 	iLowHLow = 70;
 	iHighHLow = 100;
-	iLowS = 50;
+	iLowS = 130;
 	iHighS = 255;
 	iLowV = 25;
 	iHighV = 100;
@@ -130,7 +130,6 @@ bool opencv::blue() {
 }
 bool opencv::brown() {
 	color = 8;
-	color = 0;
 	iLowHHigh = 175;
 	iHighHHigh = 180;
 	iLowHLow = 0;
@@ -153,18 +152,17 @@ bool opencv::cyan() {
 }
 bool opencv::purple() {
 	color = 6;
-	iLowHLow = 0;
-	iHighHLow = 3;
-	iLowHHigh =130;
-	iHighHHigh =180;
-	
+	iLowHLow = 150;
+	iHighHLow = 180;
+	iLowHHigh = 0;
+	iHighHHigh = 3;
 	///night H :D
 	//iLowHLow = 150;
 	//iHighHLow = 170;
 	iLowS = 50;
 	iHighS = 255;
 	iLowV = 0;
-	iHighV = 100;
+	iHighV = 80;
 	return true;
 }
 bool opencv::darkPurple()
@@ -387,7 +385,7 @@ void opencv::check(int *i, int cam) {
 		Point2f x = detectColoring(&threshhold_img);
 		y.x = x.x;
 		y.y = x.y;
-
+		/*
 		if (color == 0) {
 		std::cout << "red center : " << y.x << " " << y.y << " ,  " << "count : " << numCont << "  , surface : " << maxArea << std::endl;
 		}
@@ -402,7 +400,7 @@ void opencv::check(int *i, int cam) {
 		}
 		else if (color == 4) {
 		std::cout << "orange center : " << y.x << " " << y.y << "  , " << "count : " << numCont << std::endl;;
-		}
+		}*/
 		if (test) {
 			//std::cout << "H : " << iLowHLow << " " << iHighHLow << "    S : " << iLowS << " " << iHighS << "    V : " << iLowV << " " << iHighV << std::endl;
 			if (threshhold_img.empty()) break;
