@@ -72,6 +72,7 @@ int lastPosX = 1750;
 int speed[8] = { 50 , 50 , 50 , 50 , 50 , 50 , 50 , 50 };
 int acceleration[8] = { 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5 };
 int ID = 5;
+vector <bool> isOpen;
 bool dynamixell = false;
 bool motorSet = true;
 bool threadd = true;
@@ -2376,6 +2377,8 @@ void RealOpen()
 	{
 		for (int i = 0; i < 4; i++)
 		{
+			if (isOpen[0] == false)
+				break;
 			if (places[i]->found == false)
 			{
 				cout << "check place  :   " << i <<"with color : " << places[i]->color << endl;
@@ -3405,6 +3408,7 @@ void Test2()
 void Test3()
 {
 	DetectPlaces();
+	isOpen[0] = true;
 	cout << "TEST3 start " << endl;
 	notFound = true;
 	realColor[0] = -1;
@@ -3414,12 +3418,13 @@ void Test3()
 	{
 		if (Faz[0] == 0)
 		{
+			isOpen[0] = false;
 			cout << "we are in Faz0 and go to detect ball" << endl;
 			leiserRotate(0, 0);
 			leiserRotate(1, 1);
 			moveByLeiser(1, 1750, 0);
 			moveByLeiser(0, 430, 1, -1);
-			
+			isOpen[0] = true;
 			while (ardu->leiserInt[0] > 350 && realColor[0] == -1)
 			{
 				motor->moveByDistance(5, 'x', 8);
@@ -3432,11 +3437,13 @@ void Test3()
 		}
 		else if (Faz[0] == 1)
 		{
+			isOpen[0] = false;
 			cout << "we are in Faz1 and go to detect ball" << endl;
 			leiserRotate(0, 0);
 			leiserRotate(1, 1);
 			moveByLeiser(1, 1750, 0);
 			moveByLeiser(0, 950, 1, -1);
+			isOpen[0] = true; 
 			while (ardu->leiserInt[0] > 400 && realColor[0] == -1)
 			{
 				motor->moveByDistance(5, 'x', 8);
@@ -3449,6 +3456,7 @@ void Test3()
 		}
 		else if (Faz[0] == 2)
 		{
+			isOpen[0] = false;
 			cout << "we are in Faz2 and go to detect ball" << endl;
 			leiserRotate(0, 0);
 			leiserRotate(1, 1);
@@ -3456,12 +3464,14 @@ void Test3()
 			moveByLeiser(0, 620, 1, -1);
 			motor->moveByDistance(1700, 'w', 6000);
 			leiserRotate(1, 0);
+			isOpen[0] = true;
 			while (ardu->leiserInt[0] > 250 && realColor[0] == -1)
 			{
 				motor->moveByDistance(5, 'y', -8);
 			}
 			if (realColor[0] == -1)
 			{
+				isOpen[0] = false;
 				cout << "ball not found in Faz2 and we go to Faz3" << endl;
 				Faz[0] = 3;
 				motor->moveByDistance(10, 'y', 10);
@@ -3470,6 +3480,7 @@ void Test3()
 		}
 		else if (Faz[0] == 3)
 		{
+			isOpen[0] = false;
 			cout << "we are in Faz3 and go to detect ball" << endl;
 			leiserRotate(0, 0);
 			leiserRotate(1, 1);
@@ -3477,12 +3488,14 @@ void Test3()
 			moveByLeiser(0, 700, 1, -1);
 			motor->moveByDistance(1700, 'w', -6000);
 			leiserRotate(1, 1);
+			isOpen[0] = true;
 			while (ardu->leiserInt[1] > 250 && realColor[0] == -1)
 			{
 				motor->moveByDistance(5, 'y', 8);
 			}
 			if (realColor[0] == -1)
 			{
+				isOpen[0] = false;
 				cout << "ball not found in Faz3 and we go to Faz0" << endl;
 				Faz[0] = 0;
 				motor->moveByDistance(10, 'y', -10);
@@ -3538,6 +3551,7 @@ int main()
 	places[3] = new place(2650, 1480, 3370, 3, 6, 0);*/
 	realColor.push_back(-1);
 	Faz.push_back(0);
+	isOpen.push_back(true);
 	thread t(arduRead);
 	//thread m(dynamic);
 	if (dynam->dxl_initialize(4, 1) == 0)
