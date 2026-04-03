@@ -540,6 +540,7 @@ void center(int j, int cam = 0) {
 	//ardu->LED(0, 5);
 	//ardu->LED(1, 5);
 	int i = 0;
+	/*
 	open->check(&j, cam);
 	if (open->y.x > 300 && ardu->leiserInt[1] > 1300)
 	{
@@ -554,7 +555,7 @@ void center(int j, int cam = 0) {
 		motor->moveByDistance(1700, 'w', 6000);
 		motor->moveByDistance(20, 'y', 15);
 		DirCenter = -1;
-	}
+	}*/
 	stopCentering = false;
 	int color1 = 0;
 	int color2 = 0;
@@ -974,6 +975,111 @@ void moveByLeiser(bool x, int distance, int lei, int direction = 1, bool duel = 
 	ardu->LED(0, 0);
 	ardu->LED(1, 0);
 }
+void moveByLeiser22(bool x, int distance, int lei, int direction = 1, bool duel = false)
+{
+	ardu->LED(0, 5);
+	ardu->LED(1, 5);
+	ardu->leiser(false, lei);
+	if (duel)
+	{
+		while (ardu->leiserr[0] == 0 || ardu->leiserr[1] == 0)
+		{
+			ardu->leiser(true, 0);
+			ardu->leiser(true, 1);
+		}
+		if (ardu->leiserInt[0] > (ardu->leiserInt[1] + 50))
+			lei = 1;
+		else
+			lei = 0;
+	}
+	else
+	{
+		while (ardu->leiserr[lei] == 0)
+		{
+			ardu->leiser(true, lei);
+		}
+	}
+	if (abs(ardu->leiserInt[lei] - distance) > 100) {
+		int speed = (abs(ardu->leiserInt[lei] - distance) / (ardu->leiserInt[lei] - distance))
+			* direction * ((x * 2) - 1) * 40;
+		if (x)
+			motor->moveByDistance((abs(ardu->leiserInt[lei] - distance) - 100) / 10, 'x', speed);
+		else
+			motor->moveByDistance((abs(ardu->leiserInt[lei] - distance) - 100) / 10, 'y', speed);
+	}
+
+
+	motor->x = 0;
+	motor->y = 0;
+	motor->w = 0;
+	int counter = 0;
+	int k = 0;
+	do
+	{
+		//cout << ardu->leiserInt[lei] << endl;
+		if (ardu->leiserInt[lei] == 0)
+			ardu->leiser(true, lei);
+		if (duel) {
+			if (ardu->leiserInt[0] > (ardu->leiserInt[1] + 50))
+				lei = 1;
+			else
+				lei = 0;
+		}
+		if (ardu->leiserInt[lei] > 4000)
+			continue;
+		if (abs(ardu->leiserInt[lei] - distance) < 12)
+			counter++;
+		if (x)
+		{
+			if (ardu->leiserInt[lei] - distance > 400)
+				motor->x = 40 * direction;
+			else if (ardu->leiserInt[lei] - distance < -400)
+				motor->x = -40 * direction;
+			else if (ardu->leiserInt[lei] - distance > 250)
+				motor->x = 12 * direction;
+			else if (ardu->leiserInt[lei] - distance < -250)
+				motor->x = -12 * direction;
+			else if (ardu->leiserInt[lei] - distance > 50)
+				motor->x = 7 * direction;
+			else if (ardu->leiserInt[lei] - distance < -50)
+				motor->x = -7 * direction;
+			else if (ardu->leiserInt[lei] - distance > 12)
+				motor->x = 7 * direction;
+			else if (ardu->leiserInt[lei] - distance < -12)
+				motor->x = -7 * direction;
+			else {
+				motor->stop();
+			}
+
+		}
+		else
+		{
+			if (ardu->leiserInt[lei] - distance > 400)
+				motor->y = -30 * direction;
+			else if (ardu->leiserInt[lei] - distance < -400)
+				motor->y = 30 * direction;
+			else if (ardu->leiserInt[lei] - distance > 250)
+				motor->y = -12 * direction;
+			else if (ardu->leiserInt[lei] - distance < -250)
+				motor->y = 12 * direction;
+			else if (ardu->leiserInt[lei] - distance > 50)
+				motor->y = -7 * direction;
+			else if (ardu->leiserInt[lei] - distance < -50)
+				motor->y = 7 * direction;
+			else if (ardu->leiserInt[lei] - distance > 12)
+				motor->y = -7 * direction;
+			else if (ardu->leiserInt[lei] - distance < -12)
+				motor->y = 7 * direction;
+			else
+				motor->stop();
+		}
+		motor->move(true);
+	} while (counter < 30);
+	motor->stop();
+	ardu->LED(0, 0);
+	ardu->LED(1, 0);
+}
+
 void moveByLeiser2(bool x, int distance, int lei, int direction = 1, bool duel = false)
 {
 	ardu->LED(0, 5);
@@ -2264,6 +2370,136 @@ void realOpenCv()
 		}
 	}
 }
+void RealOpen()
+{
+	while (notFound)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (places[i]->found == false)
+			{
+				cout << "check place  :   " << i <<"with color : " << places[i]->color << endl;
+				open->check(&(places[i]->color), 1);
+				if (open->maxArea > 1000)
+				{
+					cout << "  With maxArea :  " << open->maxArea << endl;
+					realColor[0] = places[i]->color;
+					cout << "realColor set as : " << realColor[0] << endl;
+					notFound = false;
+					cout << "centering..." << endl;
+					center(realColor[0], 1);
+					cout << "centering done " << endl;
+					greep(0);
+					leiserRotate(0, 0);
+					Sleep(400);
+					if (ardu->leiserInt[0] > 450 && ardu->leiserInt[0] != 0)
+					{
+						cout << "leiserInt[0] more than 450 and we go to greep with num : "<< ardu->leiserInt[0] << endl;
+						motor->moveByDistance(220, 'x', 15);
+					}
+					else
+					{
+						cout << "we move toward wall to greep " << endl;
+						moveByLeiser(1, 260, 0);
+					}
+					greep(1);
+					motor->moveByDistance(5, 'x', -20);
+					rotateArm(-11500, 0, 0);
+					rotateArm(-11500, 3200, 0);
+					cout << "now we are in Faz = " << Faz[0] <<"  and we go to replace the ball "<< endl;
+					if (Faz[0] == 0 | Faz[0] == 1)
+					{
+						leiserRotate(0, 0);
+						moveByLeiser(1, 1700, 0);
+						motor->moveByDistance(3400, 'w', 6000);
+						leiserRotate(1, 0);
+						moveByLeiser(0, 110, 0);
+					}
+					else if (Faz[0] == 2)
+					{
+						ardu->setSharp(0);
+						motor->moveByDistance(1700, 'w', 6000);
+						leiserRotate(1, 0);
+						moveByLeiser(0, 110, 0);
+						sharp();
+						leiserRotate(1, 0);
+						moveByLeiser(0, 110, 0);
+
+					}
+					else if (Faz[0] == 3)
+					{
+						ardu->setSharp(0);
+						motor->moveByDistance(1700, 'w', -6000);
+						leiserRotate(1, 0);
+						moveByLeiser(0, 110, 0);
+						sharp();
+						leiserRotate(1, 0);
+						moveByLeiser(0, 110, 0);
+					}
+
+
+					ardu->setSharp(0);
+					leiserRotate(0, 0);
+					moveByLeiser(1, 130, 0);
+					sharp();
+					ardu->setSharp(2);
+					leiserRotate(1, 1);
+					moveByLeiser(0, 110, 1, -1);
+					leiserRotate(0, 1);
+					moveByLeiser(1, 160, 1);
+					sharp();
+					leiserRotate(0, 1);
+					moveByLeiser(1, 160, 1);
+					leiserRotate(1, 1);
+					rotateArm(-11500, 3200, 0);
+					rotateArm(-11500, 1000, 0);
+					rotateArm(-8000, 1000, 0);
+					leiserRotate(1, 0);
+					cout << "posY for place    " << i << "     is : " << places[i]->positionY << endl;
+					moveByLeiser(0, places[i]->positionY, 0);
+					dynam->dxl_write_word(10, 30, FGreep1 + 590);
+					Sleep(2000);
+					greep(1);
+					rotateArm(-11500, 1000, 0);
+					rotateArm(-11500, 3200, 0);
+					leiserRotate(1, 1);
+					moveByLeiser(0, 110, 1, -1);
+					leiserRotate(0, 1);
+					moveByLeiser(1, 810, 1);
+					leiserRotate(1, 0);
+					moveByLeiser(0, 110, 0);
+					leiserRotate(0, 0);
+					moveByLeiser(1, 800, 0);
+					Sleep(200);
+					motor->moveByDistance(7, 'y', 6);
+					Sleep(200);
+					motor->moveByDistance(3400, 'w', 6000);
+					/// gozashtane jesm va bargasht be gate
+
+					rotateArm(-11500, 0, 0);
+					rotateArm(0, 0, 0);
+					greep(1);
+					cout << "change faz from   " << Faz[0];
+					if (Faz[0] == 0)
+						Faz[0] = 1;
+					else if (Faz[0] == 1)
+						Faz[0] = 2;
+					else if (Faz[0] == 2)
+						Faz[0] = 3;
+					else if (Faz[0] == 3)
+						Faz[0] = 0;
+					cout << "     to    " << Faz[0] << endl;
+					places[i]->found = true;
+					places[i]->complete = true;
+					cout << "done replace ball for place   " << i << endl;
+					return;
+
+
+				}
+			}
+		}
+	}
+}
 void senario()
 {
 
@@ -2806,9 +3042,9 @@ void DetectPlaces()
 			motor->moveByDistance(10, 'y', -7);
 		countPar++;
 	}
-	cout << parent << endl;
 	//places[0]->code = setCode(parent);
 	places[0]->color = setColor(parent);
+	cout << "place 0 is  :  " << parent <<"with color code : "<< places[0]->color << endl;
 	//motor->moveByDistance(21, 'y', -15);
 	moveByLeiser(0, 690, 1, -1);
 	countPar = 0;
@@ -2821,9 +3057,9 @@ void DetectPlaces()
 			motor->moveByDistance(10, 'y', -7);
 		countPar++;
 	}
-	cout << parent << endl;
 	//places[1]->code = setCode(parent);
 	places[1]->color = setColor(parent);
+	cout << "place 1 is  :  " << parent << "with color code : " << places[1]->color << endl;
 	//motor->moveByDistance(35, 'y', -15);
 	moveByLeiser(0, 1040, 1, -1);
 	countPar = 0;
@@ -2836,9 +3072,9 @@ void DetectPlaces()
 			motor->moveByDistance(10, 'y', -7);
 		countPar++;
 	}
-	cout << parent << endl;
 	//places[2]->code = setCode(parent);
 	places[2]->color = setColor(parent);
+	cout << "place 2 is  :  " << parent << "with color code : " << places[2]->color << endl;
 	//motor->moveByDistance(21, 'y', -15);
 	moveByLeiser(0, 1295, 1, -1);
 	countPar = 0;
@@ -2851,9 +3087,9 @@ void DetectPlaces()
 			motor->moveByDistance(10, 'y', -7);
 		countPar++;
 	}
-	cout << parent << endl;
 	//places[3]->code = setCode(parent);
 	places[3]->color = setColor(parent);
+	cout << "place 3 is  :  " << parent << "with color code : " << places[3]->color << endl;
 	ardu->setSharp(0);
 	leiserRotate(1, 0);
 	moveByLeiser(0, 110, 0);
@@ -2867,8 +3103,9 @@ void DetectPlaces()
 	sharp();
 	rotateArm(-11500, 0, 0);
 	rotateArm(0, 0, 0);
-
+	greep(1);
 	motor->moveByDistance(60, 'x', 20);
+	cout << "DetectPlace end :)" << endl;
 }
 void Test1()
 {
@@ -3165,6 +3402,111 @@ void Test2()
 		}
 	}
 }
+void Test3()
+{
+	DetectPlaces();
+	cout << "TEST3 start " << endl;
+	notFound = true;
+	realColor[0] = -1;
+	cout << "creating thread for image proseccing..." << endl;
+	thread GOD(RealOpen);
+	while (!places[0]->complete | !places[1]->complete | !places[2]->complete | !places[3]->complete)
+	{
+		if (Faz[0] == 0)
+		{
+			cout << "we are in Faz0 and go to detect ball" << endl;
+			leiserRotate(0, 0);
+			leiserRotate(1, 1);
+			moveByLeiser(1, 1750, 0);
+			moveByLeiser(0, 430, 1, -1);
+			
+			while (ardu->leiserInt[0] > 350 && realColor[0] == -1)
+			{
+				motor->moveByDistance(5, 'x', 8);
+			}
+			if (realColor[0] == -1)
+			{
+				cout << "ball not found in Faz0 and we go to Faz1" << endl;
+				Faz[0] = 1;
+			}
+		}
+		else if (Faz[0] == 1)
+		{
+			cout << "we are in Faz1 and go to detect ball" << endl;
+			leiserRotate(0, 0);
+			leiserRotate(1, 1);
+			moveByLeiser(1, 1750, 0);
+			moveByLeiser(0, 950, 1, -1);
+			while (ardu->leiserInt[0] > 400 && realColor[0] == -1)
+			{
+				motor->moveByDistance(5, 'x', 8);
+			}
+			if (realColor[0] == -1)
+			{
+				cout << "ball not found in Faz1 and we go to Faz2" << endl;
+				Faz[0] = 2;
+			}
+		}
+		else if (Faz[0] == 2)
+		{
+			cout << "we are in Faz2 and go to detect ball" << endl;
+			leiserRotate(0, 0);
+			leiserRotate(1, 1);
+			moveByLeiser(1, 1700, 0);
+			moveByLeiser(0, 620, 1, -1);
+			motor->moveByDistance(1700, 'w', 6000);
+			leiserRotate(1, 0);
+			while (ardu->leiserInt[0] > 250 && realColor[0] == -1)
+			{
+				motor->moveByDistance(5, 'y', -8);
+			}
+			if (realColor[0] == -1)
+			{
+				cout << "ball not found in Faz2 and we go to Faz3" << endl;
+				Faz[0] = 3;
+				motor->moveByDistance(10, 'y', 10);
+				motor->moveByDistance(1700, 'w', -6000);
+			}
+		}
+		else if (Faz[0] == 3)
+		{
+			cout << "we are in Faz3 and go to detect ball" << endl;
+			leiserRotate(0, 0);
+			leiserRotate(1, 1);
+			moveByLeiser(1, 1700, 0);
+			moveByLeiser(0, 700, 1, -1);
+			motor->moveByDistance(1700, 'w', -6000);
+			leiserRotate(1, 1);
+			while (ardu->leiserInt[1] > 250 && realColor[0] == -1)
+			{
+				motor->moveByDistance(5, 'y', 8);
+			}
+			if (realColor[0] == -1)
+			{
+				cout << "ball not found in Faz3 and we go to Faz0" << endl;
+				Faz[0] = 0;
+				motor->moveByDistance(10, 'y', -10);
+				motor->moveByDistance(1700, 'w', 6000);
+			}
+		}
+		if (realColor[0] == -1)
+		{
+			cout << "notFound" << endl;
+		}
+		else
+		{
+			int id;
+			for (int i = 0; i < 4; i++)
+				if (places[i]->color == realColor[0])
+					id == i;
+			while (!places[id]->complete)
+			{
+				Sleep(300);
+			}
+		}
+	}
+	GOD.join();
+}
 void firstcam()
 {
 	while (true)
@@ -3215,7 +3557,13 @@ int main()
 	char s;
 	cout << "Enter s for start : " << endl;
 	cin >> s;
+	motor->moveByDistance(200, 'w', 6000);
+	cin >> s;
+	rotateArm(-11500, 0, 0);
+	rotateArm(-11500, 1000, 0);
+	rotateArm(-8000, 1000, 0);
 
+	cin >> s;
 	Test2();
 
 
