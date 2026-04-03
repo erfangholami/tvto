@@ -76,6 +76,7 @@ public:
 	const char *GetFormatStr(__int64);
 	char* readCode(Mat  &image, CBarcodeReader  &reader);
 	VideoCapture cap;
+	VideoCapture Cap;
 	char *pszTemp1;
 	char *valu;
 	int color;

@@ -29,13 +29,13 @@
 #include "opencv2\opencv.hpp"
 #include <thread>
 #include <iostream>
-#include "opencv2\aruco.hpp"
+
 
 using namespace cv;
 using namespace std;
 
 
-Mat sceneP = imread("C:\\Users\\Erfan\\Pictures\\Screenshots\\555.png");
+Mat sceneP = imread("C:\\Users\\Kurd_TVTO\\Desktop\\New folder\\Patt\\1.jpg");
 Mat outImg;
 #define mx64 2152  
 #define mx106 2400
@@ -56,14 +56,14 @@ Mat outImg;
 
 #define FGreep1 426
 #define FGreep2 610
-#define Rotator 1950
+#define Rotator 1200
 #define BalaBar 3500
 
-motors *motor = new motors(10, 3);
+motors *motor = new motors(5, 8);
 opencv *open = new opencv();
 dynamixel *dynam = new dynamixel();
-arduino *ardu = new arduino(4, 38400);
-place *places[5];
+arduino *ardu = new arduino(3, 38400);
+place *places[4];
 int counter = 0;
 int lastPosY = 180;
 int lastPosX = 2500;
@@ -485,7 +485,7 @@ void KhaloRebwar(int pos)
 }
 void leiserRotate(int direction, int num) {
 	ardu->leiser(false, num);
-
+	
 	int position = 0;
 	if (direction == 0)
 		position = 820 - (612 * num);
@@ -879,7 +879,7 @@ void moveByLeiser(bool x, int distance, int lei, int direction = 1, bool duel = 
 	}
 	if (abs(ardu->leiserInt[lei] - distance) > 100) {
 		int speed = (abs(ardu->leiserInt[lei] - distance) / (ardu->leiserInt[lei] - distance))
-			* direction * ((x * 2) - 1) * 40;
+			* direction * ((x * 2) - 1) * 15;
 		if (x)
 			motor->moveByDistance((abs(ardu->leiserInt[lei] - distance) - 100) / 10, 'x', speed);
 		else
@@ -910,13 +910,13 @@ void moveByLeiser(bool x, int distance, int lei, int direction = 1, bool duel = 
 		if (x)
 		{
 			if (ardu->leiserInt[lei] - distance > 400)
-				motor->x = 30 * direction;
+				motor->x = 20 * direction;
 			else if (ardu->leiserInt[lei] - distance < -400)
-				motor->x = -30 * direction;
+				motor->x = -20 * direction;
 			else if (ardu->leiserInt[lei] - distance > 250)
-				motor->x = 30 * direction;
+				motor->x = 12 * direction;
 			else if (ardu->leiserInt[lei] - distance < -250)
-				motor->x = -30 * direction;
+				motor->x = -12 * direction;
 			else if (ardu->leiserInt[lei] - distance > 50)
 				motor->x = 7 * direction;
 			else if (ardu->leiserInt[lei] - distance < -50)
@@ -933,13 +933,13 @@ void moveByLeiser(bool x, int distance, int lei, int direction = 1, bool duel = 
 		else
 		{
 			if (ardu->leiserInt[lei] - distance > 400)
-				motor->y = -30 * direction;
+				motor->y = -20 * direction;
 			else if (ardu->leiserInt[lei] - distance < -400)
-				motor->y = 30 * direction;
+				motor->y = 20 * direction;
 			else if (ardu->leiserInt[lei] - distance > 250)
-				motor->y = -30 * direction;
+				motor->y = -20 * direction;
 			else if (ardu->leiserInt[lei] - distance < -250)
-				motor->y = 30 * direction;
+				motor->y = 20 * direction;
 			else if (ardu->leiserInt[lei] - distance > 50)
 				motor->y = -7 * direction;
 			else if (ardu->leiserInt[lei] - distance < -50)
@@ -1153,9 +1153,7 @@ void sharp()
 
 	int sharpTimer = 0;
 	int direction = -1;
-	if (ardu->sharpNum[0] == 6 || ardu->sharpNum[0] == 0)
-		direction = 1;
-	while (ardu->sharp[ardu->sharpNum[0]] == 0)
+	while (ardu->sharp[ardu->sharpNum[0]] == 0 )
 	{
 		cout << "Error on sharp..." << endl;
 	}
@@ -1275,7 +1273,7 @@ void sharp()
 	cout << "sharp :                    " << ardu->sharp[ardu->sharpNum[0]] <<
 		"   " << ardu->sharp[ardu->sharpNum[1]] << endl;
 
-
+	/*
 	if (ardu->sharpNum[0] == 0)
 	{
 		leiserRotate(1, 0);
@@ -1292,7 +1290,7 @@ void sharp()
 		leiserRotate(1, 1);
 		moveByLeiser(false, leiNum, 1, -1);
 	}
-	/*else
+	else
 	{
 	leiserRotate(0, 1);
 	moveByLeiser(true, 120, 1);
@@ -2107,60 +2105,113 @@ void realOpenCv()
 {
 	while (notFound)
 	{
-		for (int i = 0; i < 5; i++)
+		for (int j = 0; j < 2;j++)
 		{
-			if (!notFound)
-				break;
-			if (places[i]->found == false)
+			for (int i = 0; i < 4; i++)
 			{
-				cout << "check   :   " << i << endl;
-				open->check(&(places[i]->color));
-				if (open->maxArea > 1000)
+				if (!notFound)
+					break;
+				if (places[i]->found == false)
 				{
-					realColor[0] = places[i]->color;
-					notFound = false;
-					cout << "detect color : " << realColor[0] << endl;
-					leiserRotate(2, 0);
-					leiserRotate(1, 1);
-					cout << "leisers 0-1 for set last pos is : " << ardu->leiserInt[0] << "   " << ardu->leiserInt[1] << endl;
-					while (ardu->leiserInt[0] == 0 | ardu->leiserInt[1] == 0)
+					cout << "check   :   " << i << endl;
+					open->check(&(places[i]->color),j);
+					if (open->maxArea > 1000)
 					{
-						Sleep(30);
+						realColor[0] = places[i]->color;
+						notFound = false;
+						if (j == 0)
+						{
+
+						}
+						else
+						{
+							leiserRotate(0, 0);
+							while (ardu->leiserInt[0] == 0)
+							{
+								Sleep(30);
+							}
+							lastPosX = ardu->leiserInt[0];
+							if (open->y.x > 300)
+							{
+								center(places[i]->color, j);
+								motor->moveByDistance(15, 'x', 15);
+								greep(1);
+								rotateArm(-11500, 0, 0);
+								rotateArm(-11500, 3200, 0);
+								motor->moveByDistance(10, 'y', -15);
+								
+								motor->moveByDistance(3400, 'w', -6000);///testshavad
+							}
+							else
+							{
+								rotateArm(-2000, 0, 0);
+								motor->moveByDistance(20, 'y', -15);
+								motor->moveByDistance(1700, 'w', 6000);///test shavad
+								motor->moveByDistance(20, 'y', -15);
+								center(places[i]->color, j);
+								rotateArm(0, 0, 0);
+								leiserRotate(0, 0);
+								moveByLeiser(1, 250, 0);
+								greep(1);
+								motor->moveByDistance(15, 'x', -15);
+								rotateArm(-11500, 0, 0);
+								rotateArm(-11500, 3200, 0);
+								motor->moveByDistance(1700, 'w', 6000);///test shavad
+							}
+							leiserRotate(1, 0);
+							moveByLeiser(0, 110, 0);
+
+						}
+						places[i]->found = true;
+
+
+						return;
+						/*
+						realColor[0] = places[i]->color;
+						notFound = false;
+						cout << "detect color : " << realColor[0] << endl;
+						leiserRotate(2, 0);
+						leiserRotate(1, 1);
+						cout << "leisers 0-1 for set last pos is : " << ardu->leiserInt[0] << "   " << ardu->leiserInt[1] << endl;
+						while (ardu->leiserInt[0] == 0 | ardu->leiserInt[1] == 0)
+						{
+							Sleep(30);
+						}
+						Sleep(1500);
+
+						cout << "centering..." << endl;
+						center(realColor[0], 0);
+						cout << "centerd done " << endl;
+
+
+						KhaloRebwar(3);
+						KhaloRebwar(0);
+
+
+						lastPosX = ardu->leiserInt[0];
+						lastPosY = ardu->leiserInt[1];
+
+						places[i]->found = true;
+						leiserRotate(1, 1);
+						moveByLeiser(0, 750, 1, -1);
+
+						motor->moveByDistance(3400, 'w', 6000);
+						KhaloRebwar(4);
+						leiserRotate(1, 0);
+						moveByLeiser(0, places[i]->positionY, 0);
+						leiserRotate(0, 1);
+						moveByLeiser(1, places[i]->positionX, 1);
+						dynam->syncWrite(6, 7, 30, 1297, 2597);
+
+						Sleep(1000);
+						moveByLeiser(1, 2200, 1);
+						moveByLeiser(0, 750, 0);
+						KhaloRebwar(0);
+						Sleep(2000);
+						motor->moveByDistance(3400, 'w', 6000);
+						places[i]->complete = true;
+						return;*/
 					}
-					Sleep(1500);
-
-					cout << "centering..." << endl;
-					center(realColor[0], 0);
-					cout << "centerd done " << endl;
-
-
-					KhaloRebwar(3);
-					KhaloRebwar(0);
-
-
-					lastPosX = ardu->leiserInt[0];
-					lastPosY = ardu->leiserInt[1];
-
-					places[i]->found = true;
-					leiserRotate(1, 1);
-					moveByLeiser(0, 750, 1, -1);
-
-					motor->moveByDistance(3400, 'w', 6000);
-					KhaloRebwar(4);
-					leiserRotate(1, 0);
-					moveByLeiser(0, places[i]->positionY, 0);
-					leiserRotate(0, 1);
-					moveByLeiser(1, places[i]->positionX, 1);
-					dynam->syncWrite(6, 7, 30, 1297, 2597);
-
-					Sleep(1000);
-					moveByLeiser(1, 2200, 1);
-					moveByLeiser(0, 750, 0);
-					KhaloRebwar(0);
-					Sleep(2000);
-					motor->moveByDistance(3400, 'w', 6000);
-					places[i]->complete = true;
-					return;
 				}
 			}
 		}
@@ -2563,82 +2614,278 @@ void senariooo()
 		}
 	}
 }
-void findObject ( Mat objectP, int minHessian, Scalar color );
+void senarioooo()
+{
 
+	place *pl[6];
+	pl[0] = new place(600, 530, -10050, -1, -1, 1);
+	pl[1] = new place(600, 530, -1005, -1, -1, 1);
+	pl[2] = new place(600, 710, -10200, -1, -1, 1);
+	pl[3] = new place(600, 710, -1005, -1, -1, 1);
+	pl[4] = new place(600, 943, -10400, -1, -1, 1);
+	pl[5] = new place(600, 943, -1005, -1, -1, 1);
+		leiserRotate(1, 0);
+	leiserRotate(0, 1);
+	moveByLeiser(0, 300, 0);
+	KhaloRebwar(1);
+	Sleep(2000);
+	greep(1);
+	ardu->setSharp(0);
+	rotateArm(-11500, -3200, 0);
+	moveByLeiser(0, 150, 0);
+	sharp();
+	moveByLeiser(0, 85, 0);
+	moveByLeiser(1, 1000, 1);///set 1000 
+	int countGirANawid = 0;
+	while (countGirANawid < 1) {
+		String parent = "UNKNOWN";
+		while (parent == "UNKNOWN")
+			parent = (String)open->detectCode();
+		cout << parent << endl;
+		places[0]->code = setCode(parent);
+		places[0]->color = setColor(places[0]->code);
+
+		moveByLeiser(0,325, 0);
+		
+		while (parent == "UNKNOWN" | parent == setStr(places[0]->code))
+			parent = (String)open->detectCode();
+		cout << parent << endl;
+		places[1]->code = setCode(parent);
+		places[1]->color = setColor(places[1]->code);
+
+		moveByLeiser(0, 565, 0);
+		while (parent == "UNKNOWN" | parent == setStr(places[1]->code))
+			parent = (String)open->detectCode();
+		cout << parent << endl;
+		places[2]->code = setCode(parent);
+		places[2]->color = setColor(places[2]->code);
+
+		moveByLeiser(0, 855, 0);
+		while (parent == "UNKNOWN" | parent == setStr(places[2]->code))
+			parent = (String)open->detectCode();
+		cout << parent << endl;
+		places[3]->code = setCode(parent);
+		places[3]->color = setColor(places[3]->code);
+
+		moveByLeiser(0, 1120, 0);
+		while (parent == "UNKNOWN" | parent == setStr(places[3]->code))
+			parent = (String)open->detectCode();
+		cout << parent << endl;
+		places[4]->code = setCode(parent);
+		places[4]->color = setColor(places[4]->code);
+
+		countGirANawid++;
+	}
+
+
+	motor->moveByDistance(30, 'x', 20);
+	
+	//moveByLeiser(0, 530, 0);
+	//moveByLeiser(1, 590, 1);
+	
+	rotateArm(-11500, 0, 0);
+	rotateArm(-10055, 0, 0);
+
+	KhaloRebwar(0);
+	for (int i = 0; i < 5; i++)
+	{
+		leiserRotate(1, 0);
+		leiserRotate(0, 1);
+		for (int j = 0; j < 5; j++)
+			places[j]->x = 0;
+		moveByLeiser(0, pl[i]->positionY, 0);
+		moveByLeiser(1, pl[i]->positionX, 1);
+
+		rotateArm(pl[i]->positionW, 0, 0);
+		greep(0);
+		int Near = 1000;
+		int posnum = -1;
+					
+		for (int j = 0; j < 5;j++)
+		{
+			Sleep(100);
+			open->y.x = 0;
+			if (!places[j]->found)
+			{
+				cout << "Check : " << j << endl;
+				open->check(&places[j]->color, 1);
+				cout << "x : " << open->y.x << endl;
+				if (abs(open->y.x - 320) < Near)
+				{
+					Near = abs(open->y.x - 320);
+					posnum = j;
+				}
+			}
+		}
+		if (posnum != -1)
+		{
+			cout << "Found pos : " << posnum << "  and color : " << places[posnum]->color << endl;
+			motor->moveByDistance(25, 'x', 20);
+			greep(1);
+			motor->moveByDistance(45, 'x', -20);
+			rotateArm(-11500, 0, 0);
+			motor->moveByDistance(3400, 'w', 6000);
+			leiserRotate(2, 0);
+			moveByLeiser(1, 1360, 0, -1);
+			leiserRotate(1, 1);
+			moveByLeiser(0, places[posnum]->positionY, 1, -1);
+			rotateArm(-8000, 0, 0);
+			greep(0);
+			places[posnum]->found = true;
+			motor->moveByDistance(30, 'x', -20);
+			greep(1);
+			rotateArm(-11500, 0, 0);
+			moveByLeiser(0, 750, 1, -1);
+			motor->moveByDistance(3400, 'w', 6000);
+		}
+		
+	}
+
+
+}
+void findObject ( Mat objectP, int minHessian, Scalar color );
+void DetectPlaces()
+{
+	leiserRotate(1, 1);
+	moveByLeiser(0, 420, 1, -1);
+	String parent = "UNKNOWN";
+	while (parent == "UNKNOWN")
+		parent = (String)open->detectCode();
+	cout << parent << endl;
+	//places[0]->code = setCode(parent);
+	//places[0]->color = setColor(places[0]->code);
+	motor->moveByDistance(21, 'y', -15);
+
+	while (parent == "UNKNOWN" |  parent == setStr(places[0]->code))
+		parent = (String)open->detectCode();
+	cout << parent << endl;
+	//places[1]->code = setCode(parent);
+	//places[1]->color = setColor(places[1]->code);
+	motor->moveByDistance(35, 'y', -15);
+
+	while (parent == "UNKNOWN" | parent == setStr(places[1]->code))
+		parent = (String)open->detectCode();
+	cout << parent << endl;
+	//places[2]->code = setCode(parent);
+	//places[2]->color = setColor(places[2]->code);
+	motor->moveByDistance(21, 'y', -15);
+
+	while (parent == "UNKNOWN" | parent == setStr(places[2]->code))
+		parent = (String)open->detectCode();
+	cout << parent << endl;
+	//places[3]->code = setCode(parent);
+	//places[3]->color = setColor(places[3]->code);
+	ardu->setSharp(0);
+	leiserRotate(2, 0);
+	moveByLeiser(0, 110, 0);
+	leiserRotate(0, 0);
+	moveByLeiser(1, 70, 0);
+	
+	sharp();
+	ardu->setSharp(2);
+	leiserRotate(1, 1);
+	moveByLeiser(0, 110, 1, -1);
+	sharp();
+	rotateArm(-11500, 0, 0);
+	rotateArm(0, 0, 0);
+
+
+}
+void Test1()
+{
+	for (int i = 0; i < 4; i++)
+	{
+
+	}
+} 
+void firstcam()
+{
+	while (true)
+	{
+		for (int i = 0;i < 1;i++)
+		{
+			for (int j = 0;j < 4; j++)
+			{
+				open->check(&j, i);
+				if (open->maxArea > 1000)
+				{
+					cout << "detected color :" << j << "   with cam :" << i << endl;
+				}
+			}
+		}
+	}
+}
 int main() 
 {
-	places[0] = new place(2650, 120, 3370, -1, -1, 0);
-	places[1] = new place(2650, 450, 3370, -1, -1, 0);
-	places[2] = new place(2650, 800, 3370, -1, -1, 0);
-	places[3] = new place(2650, 1200, 3370, -1, -1, 0);
-	places[4] = new place(2650, 1430, 3370, -1, -1, 0);
 	/*
+	places[0] = new place(2650, 150, 3370, -1, -1, 0);
+	places[1] = new place(2650, 325, 3370, -1, -1, 0);
+	places[2] = new place(2650, 565, 3370, -1, -1, 0);
+	places[3] = new place(2650, 855, 3370, -1, -1, 0);
+	places[4] = new place(2650, 1120, 3370, -1, -1, 0);
+	*/
 	places[0] = new place(2650, 120, 3370, 1, 1, 0);
 	places[1] = new place(2650, 450, 3370, 6, 2, 0);
-	places[2] = new place(2650, 800, 3370, 3, 0, 0);
-	places[3] = new place(2650, 1200, 3370, 7, 6, 0);
-	places[4] = new place(2650, 1530, 3370, 5, 4, 0);*/
+	places[2] = new place(2650, 800, 3370, 5, 4, 0);
+	places[3] = new place(2650, 1200, 3370, 3, 0, 0);
 	realColor.push_back(-1);
-	//thread t(arduRead);
-
-	if (dynam->dxl_initialize(5, 1) == 0)
+	thread t(arduRead);
+	//thread m(dynamic);
+	if (dynam->dxl_initialize(4, 1) == 0)
 	{
 		dynamixell = false;
 		cout << "error while open dynamixel port..." << endl;
 	}
-	//testAll	
-
-
-			
-	//VideoCapture cap(0);
-	//cap >> sceneP;
+	testAll();
+	dynam->syncWrite(2, 4, 32, 100, 100);
+	dynam->dxl_write_word(4, 30, 1332);
+	dynam->dxl_write_word(2, 30, 109);
+	dynam->dxl_write_word(1, 32,100);
+	dynam->dxl_write_word(1, 30,3000);
+	dynamic();
+	greep(1);
+	rotateArm(-11500,3200, 0);
+	dynam->syncWrite(2, 4, 32, 100, 100);
+	dynam->syncWrite(2, 4, 30, 803, 1717);
+	Sleep(3000);
+	//KhaloRebwar(0);
+	dynam->dxl_write_word(1, 30, 1981);
+	Sleep(2000);
 	
-/*	Mat Gray(sceneP.size(), CV_8U);
-	cvtColor(sceneP, Gray, CV_BGR2GRAY);
-	Mat Bin(Gray.size(),Gray.type());
-	threshold(Gray, Bin, 100, 1000, cv::THRESH_BINARY);
-
-	sceneP = Bin;*/
-	//imshow("Binary", Bin);
-	//VideoCapture cap(1);
-	//cap >> sceneP;
-	//cvtColor(sceneP, sceneP, COLOR_BGR2GRAY);
-	//IplImage m = (IplImage)sceneP;
-	//cvThreshold(&m, &m, 100, 255, CV_THRESH_BINARY);
-	//Sleep(2000);
-	Mat find = imread("C:\\Users\\Erfan\\Desktop\\Patt\\1.jpg");
-	/*Mat gray(find.size(), CV_8U);
-	cvtColor(find, gray, CV_BGR2GRAY);
-	Mat bin(gray.size(), gray.type());
-	threshold(gray, bin, 100, 255, cv::THRESH_BINARY);
-	find = bin;*/
-	//Mat label = imread("label1.jpg");
-	//Mat label2 = imread("label2.jpg");
-	outImg = sceneP;
-
-
-	if(find.empty() && sceneP.empty())
+	int nnn;
+	cin >> nnn;
+	notFound = true;
+	realColor[0] = -1;
+	DetectPlaces();
+	leiserRotate(0, 0);
+	thread real(realOpenCv);
+	while (notFound && ardu->leiserInt[0] > 200)
 	{
-		cout << "Could not load the image!" << endl;		
-		exit(0);
+		motor->moveByDistance(5, 'x', 6);
 	}
-	else
+	motor->stop();
+	int id = -1;
+	if (realColor[0] == -1)
 	{
-		cout << "Images loaded succesfully" << endl;
+		cout << "not found" << endl;
 	}
-
-	//findObject( label, 2500, Scalar(255,0,0) );
-	//findObject( label2, 1500, Scalar(0,255,0) );{
-	findObject(find, 1500, Scalar(0, 0, 255));
-			
-
-	namedWindow("Match");
-	imshow("Match",outImg);
-
-
-	waitKey(0);
-
-	return 1;
+	else {
+		for (int i = 0; i < 4; i++)
+		{
+			if (realColor[0] == places[i]->color)
+			{
+				id = i;
+				break;
+			}
+		}
+	}
+	while (!places[id]->complete)
+	{
+		Sleep(500);
+	}
+	real.join();
+	t.join();
+	
 }
 
 void findObject( Mat objectP, int minHessian, Scalar color )
@@ -2705,7 +2952,7 @@ void findObject( Mat objectP, int minHessian, Scalar color )
 
 	//-- Localize the object
 
-  if( good_matches.size() >=8 && good_matches.size() <= 30)
+  if( good_matches.size() >=8 && good_matches.size() <= 40)
   {
 	cout << "OBJECT FOUND!" << endl;
 	std::vector<Point2f> obj;
@@ -2736,6 +2983,11 @@ void findObject( Mat objectP, int minHessian, Scalar color )
 	line( outImg, scene_corners[1] , scene_corners[2], color, 2 );
 	line( outImg, scene_corners[2] , scene_corners[3], color, 2 );
 	line( outImg, scene_corners[3] , scene_corners[0] , color, 2 );
+
+	cout << "   " << scene_corners[0].x << "  " << scene_corners[0].y << endl;
+	cout << "   " << scene_corners[1].x << "  " << scene_corners[1].y << endl;
+	cout << "   " << scene_corners[2].x << "  " << scene_corners[2].y << endl;
+	cout << "   " << scene_corners[3].x << "  " << scene_corners[3].y << endl;
   }
   else cout << "OBJECT NOT FOUND!" << endl;
 	

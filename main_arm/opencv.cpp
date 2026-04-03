@@ -300,9 +300,21 @@ void opencv::check(int *i, int cam) {
 	//std::thread intialized(gwez);
 	// open the default camera, use something different from 0 otherwise;
 	// Check VideoCapture documentation.
-	if (!cap.open(cam)) {
-		std::cout << "error on open camera..." << std::endl;
-		return;
+	if (cam == 0)
+	{
+		if (!cap.open(0)) 
+		{
+			std::cout << "error on open camera..." << std::endl;
+			return;
+		}
+	}
+	else
+	{
+		if (!Cap.open(1))
+		{
+			std::cout << "error on open camera..." << std::endl;
+			return;
+		}
 	}
 	int counter = 0;
 	while (counter < 1)
@@ -334,14 +346,19 @@ void opencv::check(int *i, int cam) {
 			gwezz = black();
 
 		Mat threshhold_img;
-		cap >> frame;
+		if (cam == 0) {
+			cap >> frame;
+		}
+		else if (cam == 1)
+		{
+			Cap >> frame;
+		}
 		cvtColor(frame, hsv, COLOR_BGR2HSV);
 		inRange(hsv, Scalar(iLowHLow, iLowS, iLowV), Scalar(iHighHLow, iHighS, iHighV), low);
 	dowrBaro:
 		if (gwezz) {
 			inRange(hsv, Scalar(iLowHHigh, iLowS, iLowV), Scalar(iHighHHigh, iHighS, iHighV), high);
 			//addWeighted(high, 0.5, low, 0.5, 0.0, threshhold_img);
-			cout <<" threshishing"<< endl;
 			//bitwise_or(high, low, threshhold_img);
 			//GaussianBlur(threshhold_img, threshhold_img, cv::Size(9, 9), 2, 2);
 			threshhold_img =  high | low;
@@ -371,7 +388,7 @@ void opencv::check(int *i, int cam) {
 		y.x = x.x;
 		y.y = x.y;
 
-		/*if (color == 0) {
+		if (color == 0) {
 		std::cout << "red center : " << y.x << " " << y.y << " ,  " << "count : " << numCont << "  , surface : " << maxArea << std::endl;
 		}
 		else if (color == 1) {
@@ -385,8 +402,7 @@ void opencv::check(int *i, int cam) {
 		}
 		else if (color == 4) {
 		std::cout << "orange center : " << y.x << " " << y.y << "  , " << "count : " << numCont << std::endl;;
-		}*/
-
+		}
 		if (test) {
 			//std::cout << "H : " << iLowHLow << " " << iHighHLow << "    S : " << iLowS << " " << iHighS << "    V : " << iLowV << " " << iHighV << std::endl;
 			if (threshhold_img.empty()) break;
@@ -443,6 +459,7 @@ const char *opencv::GetFormatStr(__int64 format)
 
 char* opencv::readCode(Mat &image, CBarcodeReader &reader)
 {
+	cout << "first" << endl;
 	int elemSize = image.elemSize();
 	int size = image.total() * elemSize;
 	// Get image data
@@ -516,13 +533,13 @@ char* opencv::readCode(Mat &image, CBarcodeReader &reader)
 			sprintf(pszTemp, "    Region: {Left: %d, Top: %d, Width: %d, Height: %d}\r\n\r\n",
 			paryResult->ppBarcodes[iIndex]->iLeft, paryResult->ppBarcodes[iIndex]->iTop,
 			paryResult->ppBarcodes[iIndex]->iWidth, paryResult->ppBarcodes[iIndex]->iHeight);
-			printf(pszTemp);*/
-
-
+			printf(pszTemp);
+			
+			*/
 			pszTemp1 = (char*)malloc(paryResult->ppBarcodes[iIndex]->iBarcodeDataLength + 1);
 			memset(pszTemp1, 0, paryResult->ppBarcodes[iIndex]->iBarcodeDataLength + 1);
 			memcpy(pszTemp1, paryResult->ppBarcodes[iIndex]->pBarcodeData, paryResult->ppBarcodes[iIndex]->iBarcodeDataLength);
-
+			
 			return pszTemp1;
 		}
 	}
